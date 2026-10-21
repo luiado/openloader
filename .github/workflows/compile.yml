@@ -1,0 +1,37 @@
+name: Compile Openloader Stage 1
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Install Embedded Toolchain
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-arm-none-eabi
+
+    - name: Install Rust Embedded Target
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: thumbv6m-none-eabi
+
+    - name: Run Build Script
+      run: |
+        chmod +x build.sh
+        ./build.sh
+
+    - name: Upload Openloader Binary Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: openloader-stage1-payloads
+        path: |
+          *.bin
+          *.elf
