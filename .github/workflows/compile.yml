@@ -13,25 +13,23 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Install Embedded Toolchain
+    - name: Install System Utilities
       run: |
         sudo apt-get update
-        sudo apt-get install -y gcc-arm-none-eabi
+        sudo apt-get install -y gcc-arm-none-eabi binutils-arm-none-eabi
 
-    - name: Install Rust Embedded Target
+    - name: Install Rust Toolchain & Target
       uses: dtolnay/rust-toolchain@stable
       with:
         targets: thumbv6m-none-eabi
 
-    - name: Run Build Script
+    - name: Direct Compilation
       run: |
-        chmod +x build.sh
-        ./build.sh
+        cargo build --release
+        arm-none-eabi-objcopy -O binary target/thumbv6m-none-eabi/release/openloader stage1.bin
 
-    - name: Upload Openloader Binary Artifacts
+    - name: Upload Openloader Binary
       uses: actions/upload-artifact@v4
       with:
-        name: openloader-stage1-payloads
-        path: |
-          *.bin
-          *.elf
+        name: openloader-stage1-payload
+        path: stage1.bin
